@@ -1,0 +1,54 @@
+Command For install SonarQube on Ubuntu
+-Create SonarQube Server using EC2 instance
+-while  creating instatnce add rule make custom tcp 9000 bcz sonarqube port no is 9000
+-Install sonarqube on same server
+-https://www.vultr.com/docs/install-sonarqube-on-ubuntu-20-04-lts/
+-Use above link for install sonarqube
+
+-Login to SonarQube Server 
+-Create Project inside the sonar server-->click on localy
+-Click on Generate the token 
+-Copy generated Token paste in notepad
+
+-Go to the Jenkins server
+-Manage Jenkins-->go to manage credential -- create a new credentials using secret text and paste the generated token from sonarqube project
+-Go to Manage Jenkins --->configure system --> go to sonarqube add name along with the IP Server address of Sonarqube | Ex: http://localhost:9000
+-install sonarqube scanner plugins 
+-go to manage Jenkins -- Global tool configuration --- add sonarqube scanner with sonarqube credential --> click onn add and save (this step run when you install sonar scanner)
+
+-Create Pipeline for application.
+pipeline{
+    agent any
+    stages{
+        stage("git"){
+            steps{
+                git 'https://github.com/sunilpowar/new_chatapp.git'
+            }
+        }
+stage ("SonarQube Analysis") {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarQubeScanner'; 
+                    withSonarQubeEnv('sonarqube') {  
+                         sh "${tool("SonarQubeScanner")}/bin/sonar-scanner -Dsonar.projectKey=sonar_qube -Dsonar.projectName=new-chat-app" 
+                    }
+                }
+            }
+        }
+stage('build') {
+            steps {
+               sshagent(['jenkins-deploy']){
+                   sh "scp -r -o StrictHostKeyChecking=no fundoo/fundooapp/templates/index.html ubuntu@10.0.1.78:/home/ubuntu/new_chatapp/fundoo/fundooapp/templates"
+               }
+            }
+        }
+stage('deploy') {
+            steps {
+               sh 'ssh -i /var/lib/jenkins/jenkins.pem ubuntu@10.0.1.78 "bash /home/ubuntu/new_chatapp/scripts/Start_Server.sh"'
+               }
+            }
+    }
+}
+
+-Build The pipeline and check its run or not.
+-if it execute successfully just check GUI inside sonar qube the link is inside the console output  click on that link and redirect the sonarqube page.

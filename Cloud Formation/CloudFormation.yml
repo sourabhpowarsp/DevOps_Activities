@@ -1,0 +1,107 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'cloud formation to create a EC2 instance with security group, vpc with 2 public and 2 private subnets with 1 EC2 into private and 1 into public subnet'
+Parameters:
+  InstanceType:
+    Type: String
+    Description: t2 micro
+    Default: t2.micro
+  KeyName:
+    Description: SSH Keypair to login to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: BackendKey
+
+Resources:
+      chatVPC:
+        Type: 'AWS::EC2::VPC'
+        Properties:
+         CidrBlock: 10.10.0.0/16
+         Tags:
+            - Key: Name
+              Value: CF-myvpc
+     
+      PublicSubnet1:
+        Type: 'AWS::EC2::Subnet'
+        Properties: 
+          Tags:
+            - Key: Name
+              Value: CF-PublicSubnet1
+          VpcId: !Ref chatVPC
+          AvailabilityZone: us-west-2a
+          CidrBlock: 10.10.1.0/24
+          MapPublicIpOnLaunch: true      
+    
+      PublicSubnet2:
+        Type: 'AWS::EC2::Subnet'
+        Properties:
+          Tags:
+            - Key: Name
+              Value: CF-PublicSubnet2
+          VpcId: !Ref chatVPC
+          AvailabilityZone: us-west-2b
+          CidrBlock: 10.10.2.0/24
+          MapPublicIpOnLaunch: true
+     
+      PrivateSubnet1:
+        Type: 'AWS::EC2::Subnet'
+        Properties:
+          Tags:
+            - Key: Name
+              Value: CF-PrivateSubnet1
+          VpcId: !Ref chatVPC
+          AvailabilityZone: us-west-2a
+          CidrBlock: 10.10.3.0/24
+          MapPublicIpOnLaunch: false
+     
+      PrivateSubnet2:
+        Type: 'AWS::EC2::Subnet'
+        Properties:
+          Tags:
+            - Key: Name
+              Value: CF-PrivateSubnet2
+          VpcId: !Ref chatVPC
+          AvailabilityZone: us-west-2b
+          CidrBlock: 10.10.4.0/24
+          MapPublicIpOnLaunch: false
+     
+      InternetGateway:
+        Type: 'AWS::EC2::InternetGateway'
+        Properties:
+          Tags:
+            - Key: Name
+              Value: CH_ig
+            - Key: Network
+              Value: Public
+      
+      GatewayToInternet:
+        Type: 'AWS::EC2::VPCGatewayAttachment'
+        Properties:
+          VpcId: !Ref chatVPC
+          InternetGatewayId: !Ref InternetGateway
+      
+      PublicRouteTable:
+        Type: 'AWS::EC2::RouteTable'
+        Properties:
+          VpcId: !Ref chatVPC
+          Tags:
+            - Key: Network
+              Value: Public
+      
+      PublicRoute:
+        Type: 'AWS::EC2::Route'
+        DependsOn: GatewayToInternet
+        Properties:
+          RouteTableId: !Ref PublicRouteTable
+          DestinationCidrBlock: 0.0.0.0/0
+          GatewayId: !Ref InternetGateway
+      
+      PublicSubnet1RouteTableAssociation:
+        Type: 'AWS::EC2::SubnetRouteTableAssociation'
+        Properties:
+          SubnetId: !Ref PublicSubnet1
+          RouteTableId: !Ref PublicRouteTable
+     
+      PublicSubnet2RouteTableAssociation:
+        Type: 'AWS::EC2::SubnetRouteTableAssociation'
+        Properties:
+          SubnetId: !Ref PublicSubnet2
+          RouteTableId: !Ref PublicRouteTable

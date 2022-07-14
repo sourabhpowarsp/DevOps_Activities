@@ -1,0 +1,12 @@
+1)Go to the Cloud formation
+2)click on create stack-with new resource
+3)select template is ready
+4)upload yml file
+5)next
+6)Give the Stack name
+7)instance type t2 micro
+8)Select your key
+9)next
+10)give the tag name and value
+11)Roll back all stack resorce
+12)create stack

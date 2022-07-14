@@ -1,0 +1,55 @@
+Docker_Compose
+
+1)install docker compose(Use Below link to install docker-compose)
+$ sudo apt install docker-compose
+$ sudo apt-get update
+https://docs.docker.com/compose/install/compose-plugin/#installing-compose-on-linux-systems
+2)check version of docker compose
+  $ docker-compose --version
+3)create folder docker-compose
+  $ mkdir docker-compose
+4)$ cd docker-compose
+5)create file docker compose
+  $ touch docker-compose.yml
+6)$ sudo nano docker-compose.yml
+
+version: '2'
+services:
+  database:
+    build:
+      dockerfile: Dockerfile
+      context: /home/ubuntu/database
+    image: database
+    container_name: databasecompose
+  backend:
+    build:
+      dockerfile: Dockerfile
+      context: /home/ubuntu/backend
+    image: backend
+    container_name: backendcompose
+    links:
+    - database
+  frontend:
+    build:
+      dockerfile: Dockerfile
+      context: /home/ubuntu/frontend
+    image: frontend
+    container_name: frontendcompose
+    ports:
+    - 80:80
+    links:
+    - backend
+------------------------------------------------------
+Note:make changes in nginx.conf file give new backend container id and again run and compose the file 
+sudo docker ps 
+7)run the docker file
+   $ sudo docker-compose up -d
+8)sudo docker ps
+9) $ docker-compose up --build
+10)$ sudo docker start databasecompose
+databasecompose
+11)$ sudo docker start backendcompose
+backendcompose
+12)$ sudo docker start frontendcompose
+frontendcompose
+13)run docker instance ip in web browser

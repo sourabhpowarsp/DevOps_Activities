@@ -1,0 +1,95 @@
+backend
+------------------
+1.connect to frontend and via pagent connect to backend.
+2.follow following steps:
+
+3.sudo apt-get update
+4.sudo apt-get install python3-pip python3-dev -y
+5.sudo apt-get update
+6.sudo pip3 install virtualenv
+7.git clone https://github.com/kadamsagar039/new_chatapp
+8.ls
+9.cd new_chatapp/
+10.virtualenv -p /usr/bin/python3 venv
+11.source venv/bin/activate
+12.vi requirements.txt
+13.pip3 install -r requirements.txt
+14.pip3 install gunicorn
+15.cd fundoo/fundoo
+16.nano settings.py ---------------update database credential
+17.cd .. 
+18.ls
+21.sudo apt-get install python3-dev default-libmysqlclient-dev build-essential
+22.pip install mysqlclient
+23.python manage.py migrate
+ 24.ls
+ 25.python manage.py collectstatic
+26.python manage.py makemigrations
+27.python manage.py migrate
+28.python3 manage.py runserver 0.0.0.0:8000
+29.sudo nano /etc/systemd/system/gunicorn.service
+ [Unit]
+      Description=gunicorn daemon
+      After=network.target
+      [Service]
+      User=ubuntu
+      Group=www-data
+      WorkingDirectory=/home/ubuntu/new_chatapp/fundoo
+      ExecStart=/home/ubuntu/new_chatapp/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8000 fundoo.wsgi:application
+     [Install]
+     WantedBy=multi-user.target
+29.gunicorn --bind 0.0.0.0:8000 fundoo.wsgi:application
+31.curl localhost:8000
+32.sudo systemctl daemon-reload
+33.sudo systemctl start gunicorn
+34.sudo systemctl enable gunicorn
+35.sudo systemctl status gunicorn
+
+36.sudo systemctl stop gunicorn
+37.sudo systemctl status gunicorn
+38.sudo systemctl daemon-reload
+39.sudo systemctl status gunicorn
+
+activat venv
+ pip3 install PYJWT
+ pip3 uninstall PYJWT
+ pip3 install PyJWT
+sudo systemctl stop gunicorn
+sudo systemctl start gunicorn
+sudo systemctl status gunicorn
+
+
+cntrl+R from seaarch use command
+=========================================================================================================================
+frontend
+after that go to frontend
+
+sudo apt-get install nginx
+
+sudo vim /etc/nginx/sites-available/fundoo
+
+server {
+        listen 80;
+        server_name _default;
+        #location = /favicon.ico { access_log off; log_not_found off; }
+        location /static/ {
+                root /home/ubuntu/new_chatapp/fundoo;
+        }
+        location / {
+               include proxy_params;
+               proxy_pass http://backendprivateip:8000;
+        }
+}
+
+sudo ln -s /etc/nginx/sites-available/fundoo /etc/nginx/sites-enabled
+sudo nginx -t
+sudo rm /etc/nginx/sites-enabled/default
+sudo systemctl restart nginx
+sudo systemctl status nginx
+
+#for checking the application is working or not by below command
+curl http://localhost
+goto webbrowser  and paste frontend ip
+
+# Check nginx error 
+sudo tail -f /var/log/nginx/error.log
